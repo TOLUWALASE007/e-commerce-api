@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce API - Product Management Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6B7280',
+                        success: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🛍️ E-Commerce API</h1>
+            <p class="text-xl text-gray-600">Product Management Test Interface</p>
+        </div>
+
+        <!-- Main Container -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Tabs Navigation -->
+            <div class="border-b border-gray-200">
+                <nav class="flex flex-wrap -mb-px">
+                    <button class="tab-btn active px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('view')">
+                        📱 View Products
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('create')">
+                        ➕ Create Product
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('update')">
+                        ✏️ Update Product
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('delete')">
+                        🗑️ Delete Product
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('search')">
+                        🔍 Search & Pagination
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6">
+                <!-- View Products Tab -->
+                <div id="view" class="tab-content active">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">View All Products</h2>
+                        <button onclick="loadProducts()" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Load Products
+                        </button>
+                    </div>
+                    <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                </div>
+
+                <!-- Create Product Tab -->
+                <div id="create" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Create New Product</h2>
+                    <form id="createProductForm" class="max-w-2xl space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="createName" class="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+                                <input type="text" id="createName" name="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                            <div>
+                                <label for="createPrice" class="block text-sm font-medium text-gray-700 mb-2">Price *</label>
+                                <input type="number" id="createPrice" name="price" step="0.01" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="createDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="createDescription" name="description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="createImageUrl" class="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                                <input type="text" id="createImageUrl" name="image_url" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                            <div>
+                                <label for="createStock" class="block text-sm font-medium text-gray-700 mb-2">Stock Quantity</label>
+                                <input type="number" id="createStock" name="stock_quantity" value="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-success hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Create Product
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Update Product Tab -->
+                <div id="update" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Update Product</h2>
+                    <div class="mb-6">
+                        <label for="updateId" class="block text-sm font-medium text-gray-700 mb-2">Product ID *</label>
+                        <input type="number" id="updateId" name="id" required class="w-full max-w-xs px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                    </div>
+                    <form id="updateProductForm" class="max-w-2xl space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="updateName" class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                                <input type="text" id="updateName" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                            <div>
+                                <label for="updatePrice" class="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                                <input type="number" id="updatePrice" name="price" step="0.01" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="updateDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="updateDescription" name="description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="updateImageUrl" class="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                                <input type="text" id="updateImageUrl" name="image_url" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                            <div>
+                                <label for="updateStock" class="block text-sm font-medium text-gray-700 mb-2">Stock Quantity</label>
+                                <input type="number" id="updateStock" name="stock_quantity" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-warning hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Update Product
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Delete Product Tab -->
+                <div id="delete" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Delete Product</h2>
+                    <div class="max-w-md space-y-6">
+                        <div>
+                            <label for="deleteId" class="block text-sm font-medium text-gray-700 mb-2">Product ID *</label>
+                            <input type="number" id="deleteId" name="id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        </div>
+                        <button onclick="deleteProduct()" class="w-full bg-danger hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Delete Product
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search & Pagination Tab -->
+                <div id="search" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Search & Pagination</h2>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <input type="text" id="searchTerm" placeholder="Search products..." class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        <input type="number" id="perPage" placeholder="Per page" value="5" min="1" max="50" class="w-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        <button onclick="searchProducts()" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Search
+                        </button>
+                        <button onclick="clearSearch()" class="bg-secondary hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                    <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6"></div>
+                    <div id="pagination" class="flex justify-center gap-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Display -->
+        <div id="response" class="mt-8 bg-white rounded-xl shadow-lg p-6 hidden">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">API Response</h3>
+            <pre id="responseContent" class="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm"></pre>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentSearch = '';
+
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.classList.remove('active', 'border-primary', 'text-primary'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Add active class to selected tab
+            event.target.classList.add('active', 'border-primary', 'text-primary');
+        }
+
+        function showResponse(data, isSuccess = true) {
+            const responseDiv = document.getElementById('response');
+            const responseContent = document.getElementById('responseContent');
+            
+            responseDiv.classList.remove('hidden');
+            responseContent.textContent = JSON.stringify(data, null, 2);
+            
+            // Update response styling based on success/error
+            if (isSuccess) {
+                responseDiv.className = 'mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-success';
+            } else {
+                responseDiv.className = 'mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-danger';
+            }
+        }
+
+        // Load all products
+        async function loadProducts() {
+            try {
+                const response = await fetch('/ecommerce-api/products');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayProducts(result.records, 'productsGrid');
+                    showResponse(result, true);
+                } else {
+                    showResponse(result, false);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        // Search products with pagination
+        async function searchProducts() {
+            const searchTerm = document.getElementById('searchTerm').value;
+            const perPage = document.getElementById('perPage').value;
+            currentSearch = searchTerm;
+            currentPage = 1;
+            
+            try {
+                const url = `/ecommerce-api/products?search=${encodeURIComponent(searchTerm)}&page=${currentPage}&per_page=${perPage}`;
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayProducts(result.records, 'searchResults');
+                    displayPagination(result.paging);
+                    showResponse(result, true);
+                } else {
+                    showResponse(result, false);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('searchTerm').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('pagination').innerHTML = '';
+            currentSearch = '';
+            currentPage = 1;
+        }
+
+        // Display products in grid
+        function displayProducts(products, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if (!products || products.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-gray-500 text-lg">No products found.</p></div>';
+                return;
+            }
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden';
+                productCard.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-semibold text-gray-900 truncate">${product.name}</h3>
+                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">ID: ${product.id}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">${product.description || 'No description available'}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl font-bold text-success">$${product.price}</span>
+                            <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Stock: ${product.stock_quantity}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(productCard);
+            });
+        }
+
+        // Display pagination
+        function displayPagination(paging) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            if (paging.total_pages <= 1) return;
+            
+            // Previous button
+            if (paging.current_page > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.textContent = '← Previous';
+                prevBtn.onclick = () => changePage(paging.current_page - 1);
+                prevBtn.className = 'px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200';
+                pagination.appendChild(prevBtn);
+            }
+            
+            // Page numbers
+            for (let i = 1; i <= paging.total_pages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => changePage(i);
+                
+                if (i === paging.current_page) {
+                    pageBtn.className = 'px-4 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-lg';
+                } else {
+                    pageBtn.className = 'px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200';
+                }
+                
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            if (paging.current_page < paging.total_pages) {
+                const nextBtn = document.createElement('button');
+                nextBtn.textContent = 'Next →';
+                nextBtn.onclick = () => changePage(paging.current_page + 1);
+                nextBtn.className = 'px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200';
+                pagination.appendChild(nextBtn);
+            }
+        }
+
+        // Change page
+        async function changePage(page) {
+            currentPage = page;
+            const perPage = document.getElementById('perPage').value;
+            
+            try {
+                const url = `/ecommerce-api/products?search=${encodeURIComponent(currentSearch)}&page=${currentPage}&per_page=${perPage}`;
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayProducts(result.records, 'searchResults');
+                    displayPagination(result.paging);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        // Create Product Form Handler
+        document.getElementById('createProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                price: parseFloat(formData.get('price')),
+                image_url: formData.get('image_url'),
+                stock_quantity: parseInt(formData.get('stock_quantity'))
+            };
+
+            try {
+                const response = await fetch('/ecommerce-api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getStoredToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+                
+                if (response.ok) {
+                    this.reset();
+                    loadProducts(); // Refresh the products list
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        });
+
+        // Update Product Form Handler
+        document.getElementById('updateProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const productId = document.getElementById('updateId').value;
+            if (!productId) {
+                showResponse({ error: 'Product ID is required' }, false);
+                return;
+            }
+            
+            const formData = new FormData(this);
+            const data = {};
+            
+            // Only include fields that have values
+            if (formData.get('name')) data.name = formData.get('name');
+            if (formData.get('description')) data.description = formData.get('description');
+            if (formData.get('price')) data.price = parseFloat(formData.get('price'));
+            if (formData.get('image_url')) data.image_url = formData.get('image_url');
+            if (formData.get('stock_quantity')) data.stock_quantity = parseInt(formData.get('stock_quantity'));
+
+            try {
+                const response = await fetch(`/ecommerce-api/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getStoredToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+                
+                if (response.ok) {
+                    this.reset();
+                    document.getElementById('updateId').value = '';
+                    loadProducts(); // Refresh the products list
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        });
+
+        // Delete Product
+        async function deleteProduct() {
+            const productId = document.getElementById('deleteId').value;
+            if (!productId) {
+                showResponse({ error: 'Product ID is required' }, false);
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete product ${productId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/ecommerce-api/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + getStoredToken()
+                    }
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+                
+                if (response.ok) {
+                    document.getElementById('deleteId').value = '';
+                    loadProducts(); // Refresh the products list
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        // Get stored JWT token
+        function getStoredToken() {
+            // In a real app, you'd get this from localStorage or sessionStorage
+            // For now, we'll prompt the user to enter it
+            const token = prompt('Please enter your JWT token (Admin access required for create/update/delete):');
+            return token || '';
+        }
+
+        // Load products on page load
+        window.addEventListener('load', function() {
+            loadProducts();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce API - Shopping Cart Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🛒 Shopping Cart Test</h1>
+            <p class="text-xl text-gray-600">Test your cart functionality</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="border-b border-gray-200">
+                <nav class="flex flex-wrap -mb-px">
+                    <button class="tab-btn active px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('view')">View Cart</button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('add')">Add to Cart</button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('products')">Browse Products</button>
+                </nav>
+            </div>
+
+            <div class="p-6">
+                <div id="view" class="tab-content active">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Your Cart</h2>
+                    <button onclick="loadCart()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg mb-6">Load Cart</button>
+                    <div id="cartItems" class="space-y-4"></div>
+                    <div id="emptyCart" class="text-center py-12 text-gray-500">Your cart is empty</div>
+                </div>
+
+                <div id="add" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Add to Cart</h2>
+                    <form id="addToCartForm" class="max-w-md space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product ID</label>
+                            <input type="number" name="product_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                            <input type="number" name="quantity" value="1" min="1" required class="w-full px-4 py-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">Add to Cart</button>
+                    </form>
+                </div>
+
+                <div id="products" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Products</h2>
+                    <button onclick="loadProducts()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg mb-6">Load Products</button>
+                    <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="response" class="mt-8 bg-white rounded-xl shadow-lg p-6 hidden">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">API Response</h3>
+            <pre id="responseContent" class="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm"></pre>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(tab => tab.classList.remove('active', 'border-blue-600', 'text-blue-600'));
+            
+            document.getElementById(tabName).classList.remove('hidden');
+            event.target.classList.add('active', 'border-blue-600', 'text-blue-600');
+        }
+
+        function showResponse(data, isSuccess = true) {
+            const responseDiv = document.getElementById('response');
+            const responseContent = document.getElementById('responseContent');
+            
+            responseDiv.classList.remove('hidden');
+            responseContent.textContent = JSON.stringify(data, null, 2);
+            
+            responseDiv.className = isSuccess ? 
+                'mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500' : 
+                'mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500';
+        }
+
+        function getStoredToken() {
+            const token = localStorage.getItem('jwt_token');
+            if (!token) {
+                const inputToken = prompt('Please enter your JWT token:');
+                if (inputToken) {
+                    localStorage.setItem('jwt_token', inputToken);
+                    return inputToken;
+                }
+                return null;
+            }
+            return token;
+        }
+
+        async function loadCart() {
+            const token = getStoredToken();
+            if (!token) return;
+
+            try {
+                const response = await fetch('/ecommerce-api/cart', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayCart(result);
+                    showResponse(result, true);
+                } else {
+                    showResponse(result, false);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        function displayCart(cartData) {
+            const cartItems = document.getElementById('cartItems');
+            const emptyCart = document.getElementById('emptyCart');
+            
+            if (cartData.items && cartData.items.length > 0) {
+                emptyCart.classList.add('hidden');
+                cartItems.innerHTML = '';
+                
+                cartData.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'bg-white border border-gray-200 rounded-lg p-4 shadow-sm';
+                    itemDiv.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-semibold">${item.name}</h3>
+                                <p class="text-gray-600">Quantity: ${item.quantity}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-green-600">$${item.price}</p>
+                                <p class="text-lg font-semibold">Total: $${item.item_total.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    `;
+                    cartItems.appendChild(itemDiv);
+                });
+            } else {
+                cartItems.innerHTML = '';
+                emptyCart.classList.remove('hidden');
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/ecommerce-api/products');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayProducts(result.records);
+                    showResponse(result, true);
+                } else {
+                    showResponse(result, false);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        function displayProducts(products) {
+            const container = document.getElementById('productsGrid');
+            container.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'bg-white rounded-lg shadow-md p-6';
+                productCard.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-2">${product.name}</h3>
+                    <p class="text-gray-600 mb-4">${product.description || 'No description'}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-2xl font-bold text-green-600">$${product.price}</span>
+                        <span class="text-sm text-gray-500">Stock: ${product.stock_quantity}</span>
+                    </div>
+                    <button onclick="addProductToCart(${product.id})" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                        Add to Cart
+                    </button>
+                `;
+                container.appendChild(productCard);
+            });
+        }
+
+        async function addProductToCart(productId) {
+            const token = getStoredToken();
+            if (!token) return;
+
+            try {
+                const response = await fetch('/ecommerce-api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: 1 })
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+                
+                if (response.ok) {
+                    loadCart();
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        document.getElementById('addToCartForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = getStoredToken();
+            if (!token) return;
+            
+            const formData = new FormData(this);
+            const data = {
+                product_id: parseInt(formData.get('product_id')),
+                quantity: parseInt(formData.get('quantity'))
+            };
+
+            try {
+                const response = await fetch('/ecommerce-api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+                
+                if (response.ok) {
+                    this.reset();
+                    loadCart();
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        });
+
+        window.addEventListener('load', function() {
+            loadCart();
+        });
+    </script>
+</body>
+</html>

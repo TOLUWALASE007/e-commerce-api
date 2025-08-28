@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce API - Authentication Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6B7280',
+                        success: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🔐 E-Commerce API</h1>
+            <p class="text-xl text-gray-600">Authentication Test Interface</p>
+        </div>
+
+        <!-- Main Container -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Tabs Navigation -->
+            <div class="border-b border-gray-200">
+                <nav class="flex flex-wrap -mb-px">
+                    <button class="tab-btn active px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('register')">
+                        📝 User Registration
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('login')">
+                        🔑 User Login
+                    </button>
+                    <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('verify')">
+                        ✅ Token Verification
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6">
+                <!-- Registration Tab -->
+                <div id="register" class="tab-content active">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">User Registration</h2>
+                    <form id="registerForm" class="max-w-md space-y-6">
+                        <div>
+                            <label for="regName" class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                            <input type="text" id="regName" name="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        </div>
+                        <div>
+                            <label for="regEmail" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                            <input type="email" id="regEmail" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        </div>
+                        <div>
+                            <label for="regPassword" class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                            <input type="password" id="regPassword" name="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="regIsAdmin" name="is_admin" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2">
+                            <label for="regIsAdmin" class="ml-2 text-sm text-gray-700">Register as Admin</label>
+                        </div>
+                        <button type="submit" class="w-full bg-success hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                            </svg>
+                            Register User
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Login Tab -->
+                <div id="login" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">User Login</h2>
+                    <form id="loginForm" class="max-w-md space-y-6">
+                        <div>
+                            <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                            <input type="email" id="loginEmail" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        </div>
+                        <div>
+                            <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                            <input type="password" id="loginPassword" name="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200">
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 5v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                            </svg>
+                            Login
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Token Verification Tab -->
+                <div id="verify" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Token Verification</h2>
+                    <div class="max-w-md space-y-6">
+                        <div>
+                            <label for="verifyToken" class="block text-sm font-medium text-gray-700 mb-2">JWT Token *</label>
+                            <textarea id="verifyToken" name="token" rows="4" placeholder="Paste your JWT token here..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200"></textarea>
+                        </div>
+                        <button onclick="verifyToken()" class="w-full bg-warning hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Verify Token
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Display -->
+        <div id="response" class="mt-8 bg-white rounded-xl shadow-lg p-6 hidden">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">API Response</h3>
+            <pre id="responseContent" class="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm"></pre>
+        </div>
+
+        <!-- Instructions -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-blue-900 mb-3">📚 How to Test</h3>
+            <div class="text-blue-800 space-y-2 text-sm">
+                <p><strong>1. Registration:</strong> Create a new user account (check "Register as Admin" for admin privileges)</p>
+                <p><strong>2. Login:</strong> Use your credentials to get a JWT token</p>
+                <p><strong>3. Verification:</strong> Paste the token to verify it's valid</p>
+                <p><strong>4. Product Management:</strong> Use the token for admin operations in the product interface</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.classList.remove('active', 'border-primary', 'text-primary'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Add active class to selected tab
+            event.target.classList.add('active', 'border-primary', 'text-primary');
+        }
+
+        function showResponse(data, isSuccess = true) {
+            const responseDiv = document.getElementById('response');
+            const responseContent = document.getElementById('responseContent');
+            
+            responseDiv.classList.remove('hidden');
+            responseContent.textContent = JSON.stringify(data, null, 2);
+            
+            // Update response styling based on success/error
+            if (isSuccess) {
+                responseDiv.className = 'mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-success';
+            } else {
+                responseDiv.className = 'mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-danger';
+            }
+        }
+
+        // Registration Form Handler
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                is_admin: formData.get('is_admin') === 'on' ? 1 : 0
+            };
+
+            try {
+                const response = await fetch('/ecommerce-api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+                
+                if (response.ok) {
+                    this.reset();
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        });
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('/ecommerce-api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+                
+                if (response.ok) {
+                    this.reset();
+                    // Store token for easy access
+                    if (result.token) {
+                        localStorage.setItem('jwt_token', result.token);
+                        alert('Token stored! You can now use it for admin operations.');
+                    }
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        });
+
+        // Token Verification
+        async function verifyToken() {
+            const token = document.getElementById('verifyToken').value;
+            
+            if (!token) {
+                showResponse({ error: 'Please enter a token to verify' }, false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/ecommerce-api/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                const result = await response.json();
+                showResponse(result, response.ok);
+            } catch (error) {
+                showResponse({ error: error.message }, false);
+            }
+        }
+
+        // Auto-fill token from localStorage if available
+        window.addEventListener('load', function() {
+            const storedToken = localStorage.getItem('jwt_token');
+            if (storedToken) {
+                document.getElementById('verifyToken').value = storedToken;
+            }
+        });
+    </script>
+</body>
+</html>
