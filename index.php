@@ -61,6 +61,28 @@ switch ("$method $endpoint") {
         $authController->login();
         break;
         
+    case 'POST verify':
+        // Get token from request body
+        $data = json_decode(file_get_contents("php://input"));
+        if (empty($data->token)) {
+            http_response_code(400);
+            echo json_encode(array("message" => "Token is required."));
+            break;
+        }
+        
+        $decoded = $authController->verifyToken($data->token);
+        if ($decoded) {
+            http_response_code(200);
+            echo json_encode(array(
+                "message" => "Token is valid.",
+                "user" => $decoded->data
+            ));
+        } else {
+            http_response_code(401);
+            echo json_encode(array("message" => "Invalid token."));
+        }
+        break;
+        
     case 'GET products':
         if ($param1) {
             $productController->read($param1);
@@ -131,6 +153,7 @@ switch ("$method $endpoint") {
                 "endpoints" => array(
                     "POST /register" => "User registration",
                     "POST /login" => "User login",
+                    "POST /verify" => "Verify JWT token",
                     "GET /products" => "List all products",
                     "GET /products/{id}" => "Get single product",
                     "POST /products" => "Create product (Admin only)",
