@@ -34,10 +34,14 @@ $db = $database->getConnection();
 require_once 'controllers/AuthController.php';
 require_once 'controllers/ProductController.php';
 require_once 'controllers/CartController.php';
+require_once 'controllers/CategoryController.php';
+require_once 'controllers/ReviewController.php';
 
 $authController = new AuthController($db);
 $productController = new ProductController($db);
 $cartController = new CartController($db);
+$categoryController = new CategoryController();
+$reviewController = new ReviewController();
 
 // Route the request
 $endpoint = isset($path_segments[0]) ? $path_segments[0] : '';
@@ -142,6 +146,45 @@ switch ("$method $endpoint") {
         }
         break;
         
+    case 'GET categories':
+        $categoryController->getAllCategories();
+        break;
+        
+    case 'POST categories':
+        $categoryController->createCategory();
+        break;
+        
+    case 'PUT categories':
+        if ($param1) {
+            $categoryController->updateCategory($param1);
+        } else {
+            http_response_code(400);
+            echo json_encode(array("message" => "Category ID required."));
+        }
+        break;
+        
+    case 'DELETE categories':
+        if ($param1) {
+            $categoryController->deleteCategory($param1);
+        } else {
+            http_response_code(400);
+            echo json_encode(array("message" => "Category ID required."));
+        }
+        break;
+        
+    case 'GET reviews':
+        if ($param1) {
+            $reviewController->getProductReviews($param1);
+        } else {
+            http_response_code(400);
+            echo json_encode(array("message" => "Product ID required."));
+        }
+        break;
+        
+    case 'POST reviews':
+        $reviewController->createReview();
+        break;
+        
     default:
         // If no specific endpoint, show welcome message
         if (empty($endpoint)) {
@@ -163,7 +206,13 @@ switch ("$method $endpoint") {
                     "POST /cart" => "Add item to cart (Auth required)",
                     "PUT /cart/{id}" => "Update cart item (Auth required)",
                     "DELETE /cart/{id}" => "Remove item from cart (Auth required)",
-                    "DELETE /cart" => "Clear entire cart (Auth required)"
+                    "DELETE /cart" => "Clear entire cart (Auth required)",
+                    "GET /categories" => "List all categories",
+                    "POST /categories" => "Create category (Admin only)",
+                    "PUT /categories/{id}" => "Update category (Admin only)",
+                    "DELETE /categories/{id}" => "Delete category (Admin only)",
+                    "GET /reviews/{product_id}" => "Get product reviews",
+                    "POST /reviews" => "Create review (Auth required)"
                 )
             ));
         } else {
